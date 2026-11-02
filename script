@@ -1,0 +1,64 @@
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/Nerd503/nodejs-cicd-demo.git'
+            }
+        }
+
+        stage('Check Environment') {
+            steps {
+                sh '''
+                    set -eu
+                    node --version
+                    npm --version
+                    git --version
+                '''
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm ci'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'npm test'
+            }
+        }
+
+        stage('Build Artifact') {
+            steps {
+                sh '''
+                    set -eu
+                    tar --exclude=node_modules \
+                        --exclude=.git \
+                        -czf nodejs-app.tar.gz .
+                '''
+
+                archiveArtifacts artifacts: 'nodejs-app.tar.gz',
+                    fingerprint: true
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'CI pipeline completed successfully.'
+        }
+
+        failure {
+            echo 'Pipeline failed. Check Console Output.'
+        }
+    }
+}
