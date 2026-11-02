@@ -1,5 +1,5 @@
 node_modules/
-
+.env
 *.log
 .DS_Store
 coverage/
@@ -10,3 +10,5 @@ build/
 *.swp
 *.swo
 *~
+*.tar.gz
+*.zip
